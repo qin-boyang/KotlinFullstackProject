@@ -11,7 +11,7 @@ import io.ktor.server.routing.*
 import org.example.project.model.AuthRequest
 
 fun main() {
-    embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = Application::module)
+    embeddedServer(Netty, port = 9090, host = "localhost", module = Application::module)
         .start(wait = true)
 }
 
@@ -27,7 +27,7 @@ fun Application.module() {
             val name = call.request.queryParameters["name"] ?: "Anonymous"
             call.respondText(sayHello(name))
         }
-        post("/authenticate") {
+        post("/auth/authenticate") {
             val request = call.receive<AuthRequest>()
             call.respondText("${request.username} ${request.password} is received")
         }
