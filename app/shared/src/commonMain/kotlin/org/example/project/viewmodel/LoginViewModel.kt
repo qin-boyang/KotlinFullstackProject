@@ -25,6 +25,10 @@ class LoginViewModel : ViewModel() {
     private val _uiState = MutableStateFlow<LoginUiState>(LoginUiState.Idle)
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
 
+    fun resetState() {
+        _uiState.value = LoginUiState.Idle
+    }
+
     private val client = HttpClient {
         install(ContentNegotiation) {
             json()
@@ -33,10 +37,6 @@ class LoginViewModel : ViewModel() {
 
     // iOS simulator connecting to local ktor server url
     private val baseUrl = "http://localhost:9090"
-
-    fun resetState() {
-        _uiState.value = LoginUiState.Idle
-    }
 
     fun login(username: String, password: String) {
         viewModelScope.launch {

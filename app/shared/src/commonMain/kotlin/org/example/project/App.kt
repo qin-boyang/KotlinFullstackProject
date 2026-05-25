@@ -13,6 +13,7 @@ import org.example.project.viewmodel.LoginViewModel
 import androidx.compose.ui.tooling.preview.Preview
 import org.example.project.ui.LoginUI
 import org.example.project.ui.ProfileUI
+import org.example.project.viewmodel.ProfileViewModel
 
 @Composable
 @Preview
@@ -24,6 +25,7 @@ fun App() {
         ) {
             val navController = rememberNavController()
             val loginViewModel: LoginViewModel = viewModel { LoginViewModel() }
+            val profileViewModel: ProfileViewModel = viewModel { ProfileViewModel() }
 
             NavHost(
                 navController = navController,
@@ -42,10 +44,12 @@ fun App() {
                 }
                 composable("profile") {
                     ProfileUI(
+                        viewModel = profileViewModel,
                         onLogout = {
                             navController.navigate("login") {
                                 popUpTo("profile") { inclusive = true }
                             }
+                            profileViewModel.resetState()
                         }
                     )
                 }

@@ -24,11 +24,19 @@ object DatabaseFactory {
             SchemaUtils.create(Todos)
             if (Todos.selectAll().empty()) {
                 Todos.insert {
+                    it[title] = "Learn Backend Dev"
+                    it[completed] = true
+                }
+                Todos.insert {
                     it[title] = "Learn Exposed"
                     it[completed] = false
                 }
                 Todos.insert {
                     it[title] = "Learn Kotlin"
+                    it[completed] = false
+                }
+                Todos.insert {
+                    it[title] = "Learn Kotlin Multiplatform"
                     it[completed] = false
                 }
             }

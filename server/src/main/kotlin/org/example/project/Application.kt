@@ -75,6 +75,21 @@ fun Application.module() {
             }
             call.respondText("Add todo success")
         }
+        put("/todos/{id}") {
+            val id = call.parameters["id"]?.toIntOrNull()
+            if (id == null) {
+                call.respond(HttpStatusCode.BadRequest, "Invalid ID")
+            } else {
+                val request = call.receive<Todo>()
+                transaction {
+                    Todos.update({ Todos.id eq id }) {
+                        it[Todos.title] = request.title
+                        it[Todos.completed] = request.completed
+                    }
+                }
+                call.respondText("Update todo success")
+            }
+        }
         delete("/todos/{id}") {
             val id = call.parameters["id"]?.toIntOrNull()
             if (id == null) {
