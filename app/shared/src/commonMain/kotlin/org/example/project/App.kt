@@ -36,6 +36,7 @@ fun App() {
                             navController.navigate("profile") {
                                 popUpTo("login") { inclusive = true }
                             }
+                            loginViewModel.resetState()
                         }
                     )
                 }

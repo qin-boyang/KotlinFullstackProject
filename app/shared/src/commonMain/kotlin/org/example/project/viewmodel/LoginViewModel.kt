@@ -3,9 +3,7 @@ package org.example.project.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.ktor.client.*
-import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.client.plugins.logging.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -33,17 +31,25 @@ class LoginViewModel : ViewModel() {
         }
     }
 
-    // Using localhost with 'adb reverse tcp:9090 tcp:9090'
-    private val baseUrl = "http://10.0.2.2:9090"
-//    private val baseUrl = "https://app.blac.com.mx/dev/blac-mobile-app-api-services/api"
+    // iOS simulator connecting to local ktor server url
+    private val baseUrl = "http://localhost:9090"
+
+    fun resetState() {
+        _uiState.value = LoginUiState.Idle
+    }
 
     fun login(username: String, password: String) {
         viewModelScope.launch {
             _uiState.value = LoginUiState.Loading
             try {
-                val response = client.get("$baseUrl/")
+                val response = client.post("$baseUrl/auth/authenticate") {
+                    contentType(ContentType.Application.Json)
+                    setBody(AuthRequest(username, password))
+                }
+
                 if (response.status == HttpStatusCode.OK) {
                     _uiState.value = LoginUiState.Success("Welcome, $username!")
+
                 } else {
                     val errorBody = response.bodyAsText()
                     _uiState.value = LoginUiState.Error("Server returned ${response.status.value}: $errorBody")
@@ -51,23 +57,6 @@ class LoginViewModel : ViewModel() {
             } catch (e: Exception) {
                 _uiState.value = LoginUiState.Error("Connection Failed: ${e.message}")
             }
-
-
-//            try {
-//                val response = client.post("$baseUrl/auth/authenticate") {
-//                    contentType(ContentType.Application.Json)
-//                    setBody(AuthRequest(username, password))
-//                }
-//
-//                if (response.status == HttpStatusCode.OK) {
-//                    _uiState.value = LoginUiState.Success("Welcome, $username!")
-//                } else {
-//                    val errorBody = response.bodyAsText()
-//                    _uiState.value = LoginUiState.Error("Server returned ${response.status.value}: $errorBody")
-//                }
-//            } catch (e: Exception) {
-//                _uiState.value = LoginUiState.Error("Connection Failed: ${e.message}")
-//            }
         }
     }
 
