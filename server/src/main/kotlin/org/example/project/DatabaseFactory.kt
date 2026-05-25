@@ -21,6 +21,17 @@ object DatabaseFactory {
                     it[password] = "123456"
                 }
             }
+            SchemaUtils.create(Todos)
+            if (Todos.selectAll().empty()) {
+                Todos.insert {
+                    it[title] = "Learn Exposed"
+                    it[completed] = false
+                }
+                Todos.insert {
+                    it[title] = "Learn Kotlin"
+                    it[completed] = false
+                }
+            }
         }
     }
 
@@ -43,5 +54,12 @@ object Users : Table() {
     val id = integer("id").autoIncrement()
     val username = varchar("username", 50).uniqueIndex()
     val password = varchar("password", 50)
+    override val primaryKey = PrimaryKey(id)
+}
+
+object Todos : Table() {
+    val id = integer("id").autoIncrement()
+    val title = varchar("title", 50)
+    val completed = bool("completed")
     override val primaryKey = PrimaryKey(id)
 }
