@@ -93,7 +93,9 @@ fun ProfileUI(viewModel: ProfileViewModel, onLogout: () -> Unit) {
                         }
                     }
                 }
-                else -> {}
+                is ProfileUIState.Idle -> {
+                    // Do nothing
+                }
             }
         }
     }
