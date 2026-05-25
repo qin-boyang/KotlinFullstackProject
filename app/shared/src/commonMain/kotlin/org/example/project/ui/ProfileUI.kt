@@ -5,6 +5,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,10 +20,20 @@ import org.example.project.viewmodel.ProfileViewModel
 @Composable
 fun ProfileUI(viewModel: ProfileViewModel, onLogout: () -> Unit) {
     val uiState by viewModel.uiState.collectAsState()
+    var showAddDialog by remember { mutableStateOf(false) }
 
-    // Load todos when the screen is first shown
     LaunchedEffect(Unit) {
         viewModel.loadTodos()
+    }
+
+    if (showAddDialog) {
+        AddTodoDialog(
+            onDismiss = { showAddDialog = false },
+            onConfirm = { title ->
+                viewModel.createTodo(Todo(id = 0, title = title, completed = false))
+                showAddDialog = false
+            }
+        )
     }
 
     Scaffold(
@@ -34,6 +46,11 @@ fun ProfileUI(viewModel: ProfileViewModel, onLogout: () -> Unit) {
                     }
                 }
             )
+        },
+        floatingActionButton = {
+            FloatingActionButton(onClick = { showAddDialog = true }) {
+                Icon(Icons.Default.Add, contentDescription = "Add Todo")
+            }
         }
     ) { padding ->
         Box(
@@ -56,7 +73,13 @@ fun ProfileUI(viewModel: ProfileViewModel, onLogout: () -> Unit) {
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             items(state.todos) { todo ->
-                                TodoItem(todo)
+                                TodoItem(
+                                    todo = todo,
+                                    onDelete = { viewModel.deleteTodo(todo) },
+                                    onToggle = { completed ->
+                                        viewModel.updateTodo(todo.copy(completed = completed))
+                                    }
+                                )
                             }
                         }
                     }
@@ -77,7 +100,7 @@ fun ProfileUI(viewModel: ProfileViewModel, onLogout: () -> Unit) {
 }
 
 @Composable
-fun TodoItem(todo: Todo) {
+fun TodoItem(todo: Todo, onDelete: () -> Unit, onToggle: (Boolean) -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -97,8 +120,45 @@ fun TodoItem(todo: Todo) {
             }
             Checkbox(
                 checked = todo.completed,
-                onCheckedChange = null // Read-only for now
+                onCheckedChange = { onToggle(it) }
             )
+            IconButton(onClick = onDelete) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Delete Todo",
+                    tint = MaterialTheme.colorScheme.error
+                )
+            }
         }
     }
+}
+
+@Composable
+fun AddTodoDialog(onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
+    var title by remember { mutableStateOf("") }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("New Todo") },
+        text = {
+            OutlinedTextField(
+                value = title,
+                onValueChange = { title = it },
+                label = { Text("Title") },
+                singleLine = true
+            )
+        },
+        confirmButton = {
+            Button(
+                onClick = { if (title.isNotBlank()) onConfirm(title) },
+                enabled = title.isNotBlank()
+            ) {
+                Text("Add")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }
