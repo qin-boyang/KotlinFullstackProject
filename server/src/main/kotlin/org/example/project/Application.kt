@@ -9,6 +9,8 @@ import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.transactions.transaction
 import org.example.project.model.AuthRequest
 
 fun main() {
@@ -17,6 +19,7 @@ fun main() {
 }
 
 fun Application.module() {
+    DatabaseFactory.init()
     install(ContentNegotiation) {
         json()
     }
@@ -30,12 +33,15 @@ fun Application.module() {
         }
         post("/auth/authenticate") {
             val request = call.receive<AuthRequest>()
-            if (request == AuthRequest("qboyang", "123456")) {
-                call.respondText("${request.username} ${request.password} is received")
+            val user = transaction {
+                Users.selectAll().where { Users.username eq request.username }.singleOrNull()
+            }
+
+            if (user != null && user[Users.password] == request.password) {
+                call.respondText("${request.username} is authenticated")
             } else {
                 call.respond(HttpStatusCode.Unauthorized, "Invalid credentials")
             }
-
         }
         delete("/delete/{username}") {
             val username = call.parameters["username"]

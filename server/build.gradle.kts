@@ -17,6 +17,13 @@ dependencies {
     implementation(libs.ktor.serverNetty)
     implementation(libs.ktor.serverContentNegotiation)
     implementation(libs.ktor.serializationKotlinxJson)
+    
+    implementation(libs.h2)
+    implementation(libs.hikaricp)
+    implementation(libs.exposed.core)
+    implementation(libs.exposed.jdbc)
+    implementation(libs.exposed.dao)
+
     testImplementation(libs.ktor.serverTestHost)
     testImplementation(libs.ktor.clientContentNegotiation)
     testImplementation(libs.ktor.clientSerializationKotlinxJson)
